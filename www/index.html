@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+<title>Simple Parse App</title>
+<link rel=stylesheet type=text/css href="style.css">
+    
+<!-- Vendors -->
+<script src="js/jquery.js"></script>
+<script src="js/parse.js"></script>
+<script id="facebook-jssdk" type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
+
+<!-- libs: These libs dot not need jQuery. -->
+<script src="js/prototype_class.js"></script>
+<script src="repositories/parse.js"></script>
+<script src="repositories/user.js"></script>
+
+<script>
+    
+    var FACEBOOK_APP_ID = "X";
+    var PARSE_INIT_KEYS = ["Y", "Z"];
+
+    /**
+    * Funcao de inicializacao do facebook
+    **/
+    function facebook_init(callback) {
+
+        function facebookReady(){
+            // init metodo do facebook, nenhuma funcao do SDK deve ser chamada anstes dela 
+            Parse.FacebookUtils.init({
+                appId: FACEBOOK_APP_ID,
+                cookie: true, // enable cookies to allow the server to access the session
+                xfbml: true, // find and initialize any social plugins that have been added using XFBML
+                version: 'v1.0', // determine which Graph API version is used.
+            });
+        }
+
+        if(window.FB) {
+            facebookReady();
+        } else {
+            window.fbAsyncInit = facebookReady;
+        }
+    }
+
+    /*Iniciando objetos PARSE*/
+    Parse.initialize(PARSE_INIT_KEYS[0], PARSE_INIT_KEYS[1]);
+
+    /**
+    * Tests
+    **/
+    var TestSuite = PrototypeClass.extend({
+
+        /**
+        * Posta uma imagem do tipo .png
+        **/
+        postImage: function() {
+
+            ParseRepository.uploadFile({
+                name: "image",
+                ext: ".png",
+                content_type: "image/png",
+                file_upload_control: $("#profile_image")[0],
+            });
+
+        },
+
+        /**
+        * Loggin do usuario no parse de forma tradicional
+        **/
+        traditional_login: function(username, password) {
+
+            /**
+            * Repositorio de objetos Pasrse.User
+            **/
+            var repository = ParseRepository.g.user;
+
+            /**
+            * Funcao de callback ao logar
+            **/
+            function show_response(response){
+                console.log(JSON.stringify(response));
+            }
+            
+            // chamando funcao de login do repositorio
+            repository.login({username: username, password: password}, show_response);
+        },
+        
+        /**
+        * Cria um usuario no parse de forma tradicional
+        **/
+        traditional_signup: function(username, password){
+            
+            var repository = ParseRepository.g.user;
+            
+            function show_response(response){
+                console.log(JSON.stringify(response));
+            }
+            
+            repository.signup({
+                username: username,
+                password: password,
+                email: "blabla@ai.com",
+                endereco: "logo ali"
+            }, show_response);
+        
+        },
+        
+        /**
+        * Loggin do usuario no parse pelo facebook
+        **/
+        facebook_login: function() {
+            var repository = ParseRepository.g.user;
+            
+            function show_response(response){
+                console.log(JSON.stringify(response));
+            }
+            
+            // permissions: permissoes do facebook
+            repository.facebook_login({permissions: "user_likes,email"}, show_response);
+        },
+        
+        /**
+        * Logout do usuario
+        **/
+        logout: function(){
+            var repository = ParseRepository.g.user;
+            repository.logout();
+        },
+
+        /**
+        * Script para realizar testes com usuarios de forma automatica
+        **/
+        test_user: function(){
+            var repository = ParseRepository.g.user;
+
+            /**
+            * Callback para mostrar no console a resposta enviada pelo parse
+            **/
+            function show_response(response){
+                console.log(JSON.stringify(response));
+            }
+
+            /**
+            * Callback para desassociar um usuario da conta do facebook
+            **/
+            function unlink(response){
+                repository.facebook_unlink({id: response.id}, show_response);
+            };
+
+            /**
+            * Callback para deletar todos os usuarios
+            **/
+            function delete_all(response){
+                for (var i = 0; i < response.length; i++) {
+                    var object = response[i];
+                    repository.delete({id : object.id });
+                }
+            };
+            
+            // chamadas ao repositorio de usuarios
+            repository.first(null, show_response);            
+            //repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
+            //repository.facebook_login();
+            //repository.find({username: "fernando"});            
+            //repository.current(show_response);            
+            //repository.getAll(show_response);
+            //repository.current(delete_user);
+            //repository.getAll(delete_all);
+        },
+        
+        /**
+        * Script para realizar testes com eventos de forma automatica
+        **/
+        test_evento: function(){
+    
+            var repository = ParseRepository.create({class_name: "Evento_CLAsS"});
+            
+            function show_response(response){
+                console.log(JSON.stringify(response));
+            }
+
+            function delete_all(response){
+                for (var i = 0; i < response.length; i++) {
+                    var object = response[i];
+                    repository.delete({id : object.id });
+                }
+            }
+
+            function get(response){
+                repository.get({id : response.id}, show_response);
+            }
+
+            function update(response){
+                repository.put({id : response.id, data: {titulo: "ai dentro! forrozao", bairro : "Liberdade"}}, get);
+            }
+
+            repository.post({titulo: "ai dentro! forrozao", bairro: "Centro"}, show_response);
+            //repository.first(null, update);
+            repository.find({titulo: "ai dentro! forrozao"}, delete_all);
+        },
+
+        /**
+        * Roda os scripts de teste
+        **/
+        run: function() {
+            
+            for (key in TestSuite){
+                if (key.substring(0, 5) === "test_"){
+                    TestSuite[key]();
+                }
+            }
+            
+        }
+
+    });
+
+    $(document).ready(function(){
+
+        facebook_init();
+
+        /**
+        * Adicioanando eventos nos botoes
+        **/
+        
+        $("button#upload").on("click", function(e){
+            e.preventDefault();
+            TestSuite.postImage();
+        });
+
+        $("button#traditional_login").on("click", function(e){
+            e.preventDefault();
+            var username = $("#username").val();
+            var password = $("#password").val();
+            TestSuite.traditional_login(username, password);
+        });
+        
+        $("button#traditional_signup").on("click", function(e){
+            e.preventDefault();
+            var username = $("#username").val();
+            var password = $("#password").val();
+            TestSuite.traditional_signup(username, password);
+        });
+        
+        $("button#facebook_login").on("click", function(e){
+            e.preventDefault();
+            TestSuite.facebook_login();
+        });
+        
+        $("button#logout").on("click", function(e){
+            e.preventDefault();
+            TestSuite.logout();
+        });
+
+        // rodando scripts de teste
+        TestSuite.run();
+        
+    });
+    
+
+</script>
+
+<body>
+    <div id="fb-root"></div>
+    
+    <div class=page>
+
+    <h1>Página de testes do parse</h1>
+
+    <div id="content">
+       
+        <h2> Upload de Imagem.png </h2>
+        
+            <input type="file" id="profile_image">
+
+            <button id="upload">
+                upload                    
+            </button>
+        
+        <h2> Login/Signup tradicional </h2>
+
+            <input type="text" id="username" value="fernando">       
+            <input type="password" id="password" value="123">
+
+            <button id="traditional_signup">
+                signup   
+            </button>
+
+            <button id="traditional_login">
+                login   
+            </button>
+
+            <h2> Login/Signup com Facebook </h2>
+
+            <button id="facebook_login">
+                facebook login/signup
+            </button>
+
+        <h2> Logout </h2>
+        
+            <button id="logout">
+                logout
+            </button>
+        
+            <br>
+        
+        <div
+          class="fb-like"
+          data-send="true"
+          data-width="450"
+          data-show-faces="true">
+        </div>
+
+
+    </div>
+    
+    </div>
+
+
+
+</body>
+</html>
