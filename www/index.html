@@ -1,14 +1,14 @@
 <!doctype html>
 <html>
-<title>Simple Parse App</title>
+<title>Flaskr</title>
 <link rel=stylesheet type=text/css href="style.css">
     
 <!-- Vendors -->
 <script src="js/jquery.js"></script>
 <script src="js/parse.js"></script>
-<script id="facebook-jssdk" type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
 
-<!-- libs: These libs dot not need jQuery. -->
+
+<!-- My libs -->
 <script src="js/prototype_class.js"></script>
 <script src="repositories/parse.js"></script>
 <script src="repositories/user.js"></script>
@@ -21,38 +21,50 @@
     /**
     * Funcao de inicializacao do facebook
     **/
-    function facebook_init(callback) {
+    function facebook_init(app_id) {
 
-        function facebookReady(){
-            // init metodo do facebook, nenhuma funcao do SDK deve ser chamada anstes dela 
+        window.fbAsyncInit = function() {
             Parse.FacebookUtils.init({
-                appId: FACEBOOK_APP_ID,
+                appId: app_id,
                 cookie: true, // enable cookies to allow the server to access the session
                 xfbml: true, // find and initialize any social plugins that have been added using XFBML
                 version: 'v1.0', // determine which Graph API version is used.
             });
+        };
+        
+        function load_script(id, src){
+
+            if (document.getElementById(id)) {
+                return;
+            }
+
+            var js = document.createElement('script'); 
+            js.id = id;
+            js.src = src;
+
+            var fjs = document.getElementsByTagName('script')[0];
+            fjs.parentNode.insertBefore(js, fjs);    
         }
 
-        if(window.FB) {
-            facebookReady();
-        } else {
-            window.fbAsyncInit = facebookReady;
-        }
+        load_script("facebook-jssdk", "//connect.facebook.net/en_US/all.js");
     }
+    
+    /*Iniciando facebook*/
+    facebook_init(FACEBOOK_APP_ID);
 
     /*Iniciando objetos PARSE*/
     Parse.initialize(PARSE_INIT_KEYS[0], PARSE_INIT_KEYS[1]);
-
+        
     /**
     * Tests
     **/
     var TestSuite = PrototypeClass.extend({
-
+        
         /**
         * Posta uma imagem do tipo .png
         **/
         postImage: function() {
-
+    
             ParseRepository.uploadFile({
                 name: "image",
                 ext: ".png",
@@ -61,17 +73,17 @@
             });
 
         },
-
+        
         /**
         * Loggin do usuario no parse de forma tradicional
         **/
         traditional_login: function(username, password) {
-
+            
             /**
             * Repositorio de objetos Pasrse.User
             **/
             var repository = ParseRepository.g.user;
-
+            
             /**
             * Funcao de callback ao logar
             **/
@@ -171,7 +183,7 @@
         **/
         test_evento: function(){
     
-            var repository = ParseRepository.create({class_name: "Evento_CLAsS"});
+            var repository = ParseRepository.create({class_name: "Evento"});
             
             function show_response(response){
                 console.log(JSON.stringify(response));
@@ -214,8 +226,6 @@
 
     $(document).ready(function(){
 
-        facebook_init();
-
         /**
         * Adicioanando eventos nos botoes
         **/
@@ -250,7 +260,7 @@
         });
 
         // rodando scripts de teste
-        TestSuite.run();
+        //TestSuite.run();
         
     });
     
@@ -268,38 +278,40 @@
        
         <h2> Upload de Imagem.png </h2>
         
-            <input type="file" id="profile_image">
+        <input type="file" id="profile_image">
 
-            <button id="upload">
-                upload                    
-            </button>
+        <button id="upload">
+            upload                    
+        </button>
         
         <h2> Login/Signup tradicional </h2>
 
-            <input type="text" id="username" value="fernando">       
-            <input type="password" id="password" value="123">
+        <input type="text" id="username" value="fernando">       
+        <input type="password" id="password" value="123">
+        
+        <button id="traditional_signup">
+            signup   
+        </button>
 
-            <button id="traditional_signup">
-                signup   
-            </button>
-
-            <button id="traditional_login">
-                login   
-            </button>
-
-            <h2> Login/Signup com Facebook </h2>
-
-            <button id="facebook_login">
-                facebook login/signup
-            </button>
-
+        <button id="traditional_login">
+            login   
+        </button>
+        
+        <h2> Login/Signup com Facebook </h2>
+        
+        <button id="facebook_login">
+            facebook login/signup
+        </button>
+        
+        <br>
+        
         <h2> Logout </h2>
         
-            <button id="logout">
-                logout
-            </button>
+        <button id="logout">
+            logout
+        </button>
         
-            <br>
+        <br>
         
         <div
           class="fb-like"
@@ -312,7 +324,7 @@
     </div>
     
     </div>
-
+    
 
 
 </body>
