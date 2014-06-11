@@ -7,17 +7,15 @@
 <script src="js/jquery.js"></script>
 <script src="js/parse.js"></script>
 
-
 <!-- My libs -->
 <script src="js/prototype_class.js"></script>
 <script src="repositories/parse.js"></script>
-<script src="repositories/user.js"></script>
 
 <script>
     
     var FACEBOOK_APP_ID = "X";
     var PARSE_INIT_KEYS = ["Y", "Z"];
-
+    
     /**
     * Funcao de inicializacao do facebook
     **/
@@ -119,14 +117,14 @@
         * Loggin do usuario no parse pelo facebook
         **/
         facebook_login: function() {
-            var repository = ParseRepository.g.user;
-            
+            var repository = ParseRepository.g.facebook_user;
+
             function show_response(response){
                 console.log(JSON.stringify(response));
             }
             
             // permissions: permissoes do facebook
-            repository.facebook_login({permissions: "user_likes,email"}, show_response);
+            repository.login({permissions: "user_likes,email"}, show_response);
         },
         
         /**
@@ -168,8 +166,8 @@
             };
             
             // chamadas ao repositorio de usuarios
-            repository.first(null, show_response);            
-            //repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
+            //repository.first(null, show_response);            
+            repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
             //repository.facebook_login();
             //repository.find({username: "fernando"});            
             //repository.current(show_response);            
@@ -226,6 +224,8 @@
 
     $(document).ready(function(){
 
+        //facebook_init();
+
         /**
         * Adicioanando eventos nos botoes
         **/
@@ -260,7 +260,7 @@
         });
 
         // rodando scripts de teste
-        //TestSuite.run();
+        TestSuite.test_user();
         
     });
     
