@@ -14,50 +14,35 @@
 <script type="text/javascript" src="https://raw.githubusercontent.com/fernandojunior/repository.js/master/repository.js"></script>
 <script type="text/javascript" src="https://raw.githubusercontent.com/fernandojunior/repository.js/master/repositories/parse.js"></script>
 
+<!-- Modified openFB for Facebook Graph API accessing -->
+<script type="text/javascript" src="https://raw.githubusercontent.com/fernandojunior/OpenFB/master/openfb.js"></script>
+
 <!-- Configuration vars -->
 <script src="js/config.js"></script>
 
 <script>
-    
+
     /**
     * Funcao de inicializacao do facebook
     **/
-    function facebook_init(app_id) {
-
-        window.fbAsyncInit = function() {
-            Parse.FacebookUtils.init({
-                appId: app_id,
-                cookie: true, // enable cookies to allow the server to access the session
-                xfbml: true, // find and initialize any social plugins that have been added using XFBML
-                version: 'v1.0', // determine which Graph API version is used.
-            });
-        };
+    function facebook_init() {
         
-        function load_script(id, src){
-
-            if (document.getElementById(id)) {
-                return;
-            }
-
-            var js = document.createElement('script'); 
-            js.id = id;
-            js.src = src;
-
-            var fjs = document.getElementsByTagName('script')[0];
-            fjs.parentNode.insertBefore(js, fjs);    
-        }
-
-        load_script("facebook-jssdk", "//connect.facebook.net/en_US/all.js");
+        // init metodo do facebook, nenhuma funcao do SDK deve ser chamada anstes dela 
+        openFB.init({
+            app_id: FACEBOOK_APP_ID,
+            redirect_url: OAUTH_REDIRECT_URL
+        });
+        
     }
-    
+
     /*Iniciando facebook*/
-    facebook_init(FACEBOOK_APP_ID);
+    facebook_init();
 
     /*Iniciando objetos PARSE*/
     Parse.initialize(PARSE_INIT_KEYS[0], PARSE_INIT_KEYS[1]);
-        
+
     /**
-    * Tests
+    * App
     **/
     var App = PrototypeClass.extend({
         
@@ -116,19 +101,21 @@
         },
         
         /**
-        * Loggin do usuario no parse pelo facebook
+        * Loggin do usuario no parse pelo facebook (openFB)
         **/
         facebook_login: function() {
-            var repository = ParseRepository.g.facebook_user;
+            
+            console.log("assaassaas");
 
             function show_response(response){
-                console.log(JSON.stringify(response));
+                console.log("abcK" + JSON.stringify(response));
             }
-            
-            // permissions: permissoes do facebook
-            repository.login({permissions: "user_likes,email"}, show_response);
+
+            var repository = ParseRepository.g.facebook_user;
+            repository.loginWithOpenFB("user_likes,email", show_response);
+
         },
-        
+
         /**
         * Logout do usuario
         **/
@@ -168,8 +155,8 @@
             };
             
             // chamadas ao repositorio de usuarios
-            //repository.first(null, show_response);            
-            repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
+            repository.first(null, show_response);            
+            //repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
             //repository.facebook_login();
             //repository.find({username: "fernando"});            
             //repository.current(show_response);            
@@ -225,7 +212,7 @@
     });
 
     $(document).ready(function(){
-
+        
         /**
         * Adicioanando eventos nos botoes
         **/
@@ -260,9 +247,11 @@
         });
 
         // rodando scripts de teste
-        // App.test_user();
+        //App.run();
         
     });
+    
+
     
 
 </script>
@@ -278,40 +267,38 @@
        
         <h2> Upload de Imagem.png </h2>
         
-        <input type="file" id="profile_image">
+            <input type="file" id="profile_image">
 
-        <button id="upload">
-            upload                    
-        </button>
+            <button id="upload">
+                upload                    
+            </button>
         
         <h2> Login/Signup tradicional </h2>
 
-        <input type="text" id="username" value="fernando">       
-        <input type="password" id="password" value="123">
-        
-        <button id="traditional_signup">
-            signup   
-        </button>
+            <input type="text" id="username" value="fernando">       
+            <input type="password" id="password" value="123">
 
-        <button id="traditional_login">
-            login   
-        </button>
-        
-        <h2> Login/Signup com Facebook </h2>
-        
-        <button id="facebook_login">
-            facebook login/signup
-        </button>
-        
-        <br>
-        
+            <button id="traditional_signup">
+                signup   
+            </button>
+
+            <button id="traditional_login">
+                login   
+            </button>
+
+            <h2> Login/Signup com Facebook </h2>
+
+            <button id="facebook_login">
+                facebook login/signup
+            </button>
+
         <h2> Logout </h2>
         
-        <button id="logout">
-            logout
-        </button>
+            <button id="logout">
+                logout
+            </button>
         
-        <br>
+            <br>
         
         <div
           class="fb-like"
@@ -324,7 +311,7 @@
     </div>
     
     </div>
-    
+
 
 
 </body>
