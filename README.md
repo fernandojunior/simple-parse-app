@@ -6,4 +6,5 @@ Simple Web Application with Parse.org and Facebook
 Run
 ===
 
-Just set up your Facebook App ID and Parse.org init keys in "www/config.js"
+Just set up your Facebook App ID and Parse.org init keys in "www/config.js".
+For using openFB, checkout openfb folder.
