@@ -41,6 +41,10 @@
     /*Iniciando objetos PARSE*/
     Parse.initialize(PARSE_INIT_KEYS[0], PARSE_INIT_KEYS[1]);
 
+    Repository.register("user", ParseRepository.User.create());
+    Repository.register("facebook_user", ParseRepository.FacebookUser.create());
+    Repository.register("evento", ParseRepository.create({class_name: "Evento"}));
+
     /**
     * App
     **/
@@ -68,7 +72,7 @@
             /**
             * Repositorio de objetos Pasrse.User
             **/
-            var repository = ParseRepository.g.user;
+            var repository = Repository.get("user");
             
             /**
             * Funcao de callback ao logar
@@ -86,7 +90,7 @@
         **/
         traditional_signup: function(username, password){
             
-            var repository = ParseRepository.g.user;
+            var repository = Repository.get("user");
             
             function show_response(response){
                 console.log(JSON.stringify(response));
@@ -111,7 +115,7 @@
                 console.log("abcK" + JSON.stringify(response));
             }
 
-            var repository = ParseRepository.g.facebook_user;
+            var repository = Repository.get("facebook_user");
             repository.loginWithOpenFB("user_likes,email", show_response);
 
         },
@@ -120,7 +124,7 @@
         * Logout do usuario
         **/
         logout: function(){
-            var repository = ParseRepository.g.user;
+            var repository = Repository.get("user");
             repository.logout();
         },
 
@@ -128,7 +132,7 @@
         * Script para realizar testes com usuarios de forma automatica
         **/
         test_user: function(){
-            var repository = ParseRepository.g.user;
+            var repository = Repository.get("user");
 
             /**
             * Callback para mostrar no console a resposta enviada pelo parse
@@ -170,7 +174,7 @@
         **/
         test_evento: function(){
     
-            var repository = ParseRepository.create({class_name: "Evento"});
+            var repository = Repository.get("evento");
             
             function show_response(response){
                 console.log(JSON.stringify(response));
