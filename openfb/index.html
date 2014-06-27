@@ -63,45 +63,44 @@
             });
 
         },
-        
+
         /**
         * Loggin do usuario no parse de forma tradicional
         **/
         traditional_login: function(username, password) {
-            
+
             /**
             * Repositorio de objetos Pasrse.User
             **/
             var repository = Repository.get("user");
-            
+
             /**
             * Funcao de callback ao logar
             **/
             function show_response(response){
                 console.log(JSON.stringify(response));
             }
-            
+
             // chamando funcao de login do repositorio
-            repository.login({username: username, password: password}, show_response);
+            repository.login({data: {username: username, password: password}, success: show_response});
         },
         
         /**
         * Cria um usuario no parse de forma tradicional
         **/
         traditional_signup: function(username, password){
-            
+
             var repository = Repository.get("user");
-            
+
             function show_response(response){
                 console.log(JSON.stringify(response));
             }
-            
+
             repository.signup({
-                username: username,
-                password: password,
-                endereco: "logo ali"
-            }, show_response);
-        
+                data: {username: username, password: password, endereco: "logo ali"},
+                success: show_response
+            });
+
         },
         
         /**
@@ -116,7 +115,7 @@
             }
 
             var repository = Repository.get("facebook_user");
-            repository.loginWithOpenFB("user_likes,email", show_response);
+            repository.loginWithOpenFB({data: {permissions: "user_likes,email"}, success: show_response});
 
         },
 
@@ -142,40 +141,32 @@
             }
 
             /**
-            * Callback para desassociar um usuario da conta do facebook
-            **/
-            function unlink(response){
-                repository.facebook_unlink({id: response.id}, show_response);
-            };
-
-            /**
             * Callback para deletar todos os usuarios
             **/
             function delete_all(response){
                 for (var i = 0; i < response.length; i++) {
                     var object = response[i];
-                    repository.delete({id : object.id });
+                    repository.delete({data: {objectId : object.id}});
                 }
             };
             
             // chamadas ao repositorio de usuarios
-            repository.first(null, show_response);            
-            //repository.signup({username: "test", password: "123"}, show_response); // modo tradicional            
-            //repository.facebook_login();
-            //repository.find({username: "fernando"});            
-            //repository.current(show_response);            
-            //repository.getAll(show_response);
-            //repository.current(delete_user);
-            //repository.getAll(delete_all);
+            repository.first({data: null, success: show_response});
+            //repository.signup({data: {username: "test", password: "123"}, success: show_response}); // modo tradicional            
+            //repository.find({data: {username: "fernando"}});
+            //repository.current({success: show_response});
+            //repository.getAll({success: show_response});
+            //repository.current({success: delete_user});
+            //repository.getAll({success: delete_all});
         },
         
         /**
         * Script para realizar testes com eventos de forma automatica
         **/
         test_evento: function(){
-    
+
             var repository = Repository.get("evento");
-            
+
             function show_response(response){
                 console.log(JSON.stringify(response));
             }
@@ -183,21 +174,24 @@
             function delete_all(response){
                 for (var i = 0; i < response.length; i++) {
                     var object = response[i];
-                    repository.delete({id : object.id });
+                    repository.delete({data: {objectId : object.id }});
                 }
             }
 
             function get(response){
-                repository.get({id : response.id}, show_response);
+                repository.get({data: {objectId : response.id}, success: show_response});
             }
 
             function update(response){
-                repository.put({id : response.id, data: {titulo: "ai dentro! forrozao", bairro : "Liberdade"}}, get);
+                repository.put({ 
+                    data: {objectId : response.id, titulo: "ai dentro! forrozao", bairro : "Liberdade"}, 
+                    success: get
+                });
             }
 
-            repository.post({titulo: "ai dentro! forrozao", bairro: "Centro"}, show_response);
-            //repository.first(null, update);
-            repository.find({titulo: "ai dentro! forrozao"}, delete_all);
+            repository.post({data: {titulo: "ai dentro! forrozao", bairro: "Centro"}, success: show_response});
+            //repository.first({data: null, success update});
+            repository.find({data: {titulo: "ai dentro! forrozao"}, success: delete_all});
         },
 
         /**
